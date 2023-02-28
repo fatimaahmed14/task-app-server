@@ -14,22 +14,23 @@ app.use(function (req, res, next) {
   next();
 });
 
-function authenticate(req, res, next) {
-  const authHeader = req.headers["authorization"];
-  const token = authHeader && authHeader.split(" ")[1];
-  if (!token) {
-    return res.status(401).json({ message: "Missing authentication token" });
-  }
-  try {
-    const decoded = jwt.verify(token, "secret");
-    req.userId = decoded.userId;
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: "Invalid authentication token" });
-  }
-}
+// currently no need for this
+// function authenticate(req, res, next) {
+//   const authHeader = req.headers["authorization"];
+//   const token = authHeader && authHeader.split(" ")[1];
+//   if (!token) {
+//     return res.status(401).json({ message: "Missing authentication token" });
+//   }
+//   try {
+//     const decoded = jwt.verify(token, "secret");
+//     req.userId = decoded.userId;
+//     next();
+//   } catch (error) {
+//     return res.status(401).json({ message: "Invalid authentication token" });
+//   }
+// }
 
-// craete new user
+// create new user
 app.post("/users", async (req, res) => {
   const { name, email, password } = req.body;
   const user = await prisma.user.create({
@@ -55,4 +56,15 @@ app.post("/login", async (req, res) => {
   }
   const token = jwt.sign({ userId: user.id }, "secret");
   res.json({ token });
+});
+
+// middleware to handle errors
+app.use(function (err, req, res, next) {
+  console.error(err);
+  res.status(500).json({ message: "Internal server error" });
+});
+
+// Start the server
+app.listen(4000, () => {
+  console.log("Server started on port 4000");
 });
