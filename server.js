@@ -14,24 +14,23 @@ app.use(function (req, res, next) {
   next();
 });
 
-// currently no need for this
-// function authenticate(req, res, next) {
-//   const authHeader = req.headers["authorization"];
-//   const token = authHeader && authHeader.split(" ")[1];
-//   if (!token) {
-//     return res.status(401).json({ message: "Missing authentication token" });
-//   }
-//   try {
-//     const decoded = jwt.verify(token, "secret");
-//     req.userId = decoded.userId;
-//     next();
-//   } catch (error) {
-//     return res.status(401).json({ message: "Invalid authentication token" });
-//   }
-// }
+function authenticate(req, res, next) {
+  const authHeader = req.headers["authorization"];
+  const token = authHeader && authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({ message: "Missing authentication token" });
+  }
+  try {
+    const decoded = jwt.verify(token, "secret");
+    req.userId = decoded.userId;
+    next();
+  } catch (error) {
+    return res.status(401).json({ message: "Invalid authentication token" });
+  }
+}
 
 // create new user
-app.post("/users", async (req, res) => {
+app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
   const user = await prisma.user.create({
     data: {
@@ -56,6 +55,21 @@ app.post("/login", async (req, res) => {
   }
   const token = jwt.sign({ userId: user.id }, "secret");
   res.json({ token });
+});
+
+// get users data
+app.get("/user", authenticate, async (req, res) => {
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: req.userId },
+    });
+
+    // returning the user object
+    return res.json(user);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error" });
+  }
 });
 
 // middleware to handle errors
