@@ -123,6 +123,27 @@ app.delete("/tasks/:id", async (req, res) => {
 });
 
 // complete task
+app.patch("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const taskToUpdate = await prisma.task.update({
+    where: { id: Number(id) },
+    data: { status: "complete" },
+    include: { user: true },
+  });
+
+  if (!taskToUpdate) {
+    return res.status(404).json({ error: "Task not found" });
+  }
+
+  res.json(taskToUpdate);
+});
+
+// get all tasks
+app.get("/tasks", async (req, res) => {
+  const tasks = await prisma.task.findMany();
+  res.json(tasks);
+});
 
 // middleware to handle errors
 app.use(function (err, req, res, next) {
