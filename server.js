@@ -108,6 +108,19 @@ app.post("/tasks", async (req, res) => {
 });
 
 // delete task
+app.delete("/tasks/:id", async (req, res) => {
+  const { id } = req.params;
+
+  const taskToDelete = await prisma.task.delete({
+    where: { id: Number(id) },
+  });
+
+  if (!taskToDelete) {
+    return res.status(404).json({ error: "Task not found" });
+  }
+
+  res.json(taskToDelete);
+});
 
 // complete task
 
