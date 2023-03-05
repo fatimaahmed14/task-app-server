@@ -72,6 +72,45 @@ app.get("/user", authenticate, async (req, res) => {
   }
 });
 
+// add task
+app.post("/tasks", async (req, res) => {
+  const { title, description, deadline, userId } = req.body;
+  let user;
+
+  if (userId) {
+    user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found" });
+    }
+  }
+
+  const createdTask = await prisma.task.create({
+    data: {
+      title,
+      description,
+      status: "incomplete",
+      deadline,
+      user: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+    include: {
+      user: true,
+    },
+  });
+
+  res.json(createdTask);
+});
+
+// delete task
+
+// complete task
+
 // middleware to handle errors
 app.use(function (err, req, res, next) {
   console.error(err);
