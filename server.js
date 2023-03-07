@@ -9,7 +9,7 @@ app.use(express.json());
 // middleware
 app.use(function (req, res, next) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, PATCH, DELETE");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
   next();
 });
@@ -161,3 +161,5 @@ app.use(function (err, req, res, next) {
 app.listen(4000, () => {
   console.log("Server started on port 4000");
 });
+
+// should I add auth to my task reqs?
