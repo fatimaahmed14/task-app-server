@@ -14,6 +14,7 @@ app.use(function (req, res, next) {
   next();
 });
 
+// authentication
 function authenticate(req, res, next) {
   const authHeader = req.headers["authorization"];
   const token = authHeader && authHeader.split(" ")[1];
@@ -139,9 +140,14 @@ app.patch("/tasks/:id", async (req, res) => {
   res.json(taskToUpdate);
 });
 
-// get all tasks
-app.get("/tasks", async (req, res) => {
-  const tasks = await prisma.task.findMany();
+// get all tasks for a user by their ID
+app.get("/tasks/:id", async (req, res) => {
+  const userId = Number(req.params.id);
+  const tasks = await prisma.task.findMany({
+    where: {
+      userId: userId,
+    },
+  });
   res.json(tasks);
 });
 
