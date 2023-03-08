@@ -40,7 +40,8 @@ app.post("/signup", async (req, res) => {
       password,
     },
   });
-  res.json(user);
+  const token = jwt.sign({ userId: user.id }, "secret");
+  res.json({ token });
 });
 
 // login
