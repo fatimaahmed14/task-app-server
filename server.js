@@ -35,16 +35,6 @@ function authenticate(req, res, next) {
 app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
 
-  // Ensure password is strong (contains at least 8 characters, including uppercase and lowercase letters, numbers, and symbols)
-  const strongRegex =
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-  if (!strongRegex.test(password)) {
-    return res.status(400).json({
-      error:
-        "Password must contain at least 8 characters, including uppercase and lowercase letters, numbers, and symbols.",
-    });
-  }
-
   // Hash password before storing in the database
   const hashedPassword = await bcrypt.hash(password, 10);
 
