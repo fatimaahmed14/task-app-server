@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
 app.use(express.json());
@@ -33,11 +34,25 @@ function authenticate(req, res, next) {
 // create new user
 app.post("/signup", async (req, res) => {
   const { name, email, password } = req.body;
+
+  // Ensure password is strong (contains at least 8 characters, including uppercase and lowercase letters, numbers, and symbols)
+  const strongRegex =
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  if (!strongRegex.test(password)) {
+    return res.status(400).json({
+      error:
+        "Password must contain at least 8 characters, including uppercase and lowercase letters, numbers, and symbols.",
+    });
+  }
+
+  // Hash password before storing in the database
+  const hashedPassword = await bcrypt.hash(password, 10);
+
   const user = await prisma.user.create({
     data: {
       name,
       email,
-      password,
+      password: hashedPassword,
     },
   });
   const token = jwt.sign({ userId: user.id }, "secret");
